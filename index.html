@@ -434,6 +434,13 @@
             box-shadow: 0 12px 32px rgba(0,0,0,0.35);
         }
         .mode-card:active { transform: translateY(-2px) scale(0.98); }
+        .mode-card.selected {
+            border-color: var(--accent);
+            background: rgba(233, 69, 96, 0.15);
+            box-shadow: 0 8px 24px rgba(233, 69, 96, 0.25);
+            transform: translateY(-4px) scale(1.02);
+        }
+        .mode-card.selected::before { opacity: 1; }
         .mode-card .icon {
             width: 56px; height: 56px; border-radius: 50%;
             background: rgba(233,69,96,0.12);
@@ -571,6 +578,12 @@
             box-shadow: 0 4px 16px rgba(233,69,96,0.2);
             transform: translateY(-2px);
         }
+        .diff-btn.selected {
+            border-color: var(--accent);
+            background: rgba(233, 69, 96, 0.2);
+            box-shadow: 0 4px 16px rgba(233, 69, 96, 0.3);
+            transform: translateY(-2px);
+        }
 
         .side-select {
             display: none;
@@ -609,6 +622,12 @@
             border-color: var(--accent);
             transform: translateY(-2px);
             box-shadow: 0 4px 16px rgba(233,69,96,0.2);
+        }
+        .side-btn.selected {
+            border-color: var(--accent);
+            background: rgba(233, 69, 96, 0.2);
+            box-shadow: 0 4px 16px rgba(233, 69, 96, 0.3);
+            transform: translateY(-2px);
         }
 
         /* ===== GAME AREA ===== */
@@ -1138,17 +1157,17 @@
 
         <h3>Choose Game Mode</h3>
         <div class="mode-cards">
-            <div class="mode-card" onclick="selectMode('human')">
+            <div class="mode-card" onclick="selectMode('human', event)">
                 <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><circle cx="18" cy="8" r="3"/><path d="M21 21v-2a3 3 0 0 0-3-3h-1"/></svg></div>
                 <div class="title">2 Players</div>
                 <div class="desc">Play with a friend on the same device</div>
             </div>
-            <div class="mode-card" onclick="selectMode('ai')">
+            <div class="mode-card" onclick="selectMode('ai', event)">
                 <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="10" r="1.5" fill="currentColor"/><circle cx="15" cy="10" r="1.5" fill="currentColor"/><path d="M9 15h6"/><line x1="12" y1="1" x2="12" y2="4"/><circle cx="12" cy="1" r="1" fill="currentColor"/></svg></div>
                 <div class="title">vs Computer</div>
                 <div class="desc">Challenge the AI opponent</div>
             </div>
-            <div class="mode-card" onclick="selectMode('online')">
+            <div class="mode-card" onclick="selectMode('online', event)">
                 <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><ellipse cx="12" cy="12" rx="4" ry="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg></div>
                 <div class="title">Online</div>
                 <div class="desc">Play with a friend via link</div>
@@ -1158,17 +1177,17 @@
         <div class="difficulty-select" id="difficulty-select">
             <h4>Select Difficulty</h4>
             <div class="diff-buttons">
-                <button class="diff-btn" onclick="selectDifficulty('easy')">Easy</button>
-                <button class="diff-btn" onclick="selectDifficulty('medium')">Medium</button>
-                <button class="diff-btn" onclick="selectDifficulty('hard')">Hard</button>
+                <button class="diff-btn" onclick="selectDifficulty('easy', event)">Easy</button>
+                <button class="diff-btn" onclick="selectDifficulty('medium', event)">Medium</button>
+                <button class="diff-btn" onclick="selectDifficulty('hard', event)">Hard</button>
             </div>
         </div>
 
         <div class="side-select" id="side-select">
             <h4>Play as</h4>
             <div class="side-buttons">
-                <button class="side-btn" onclick="startAIGame('goat')">🐐 Goats</button>
-                <button class="side-btn" onclick="startAIGame('tiger')">🐅 Tigers</button>
+                <button class="side-btn" onclick="startAIGame('goat', event)">🐐 Goats</button>
+                <button class="side-btn" onclick="startAIGame('tiger', event)">🐅 Tigers</button>
             </div>
         </div>
 
@@ -3111,7 +3130,9 @@
     }
 
     // ===== MENU / MODE SELECTION =====
-    function selectMode(mode) {
+    function selectMode(mode, event) {
+        document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+        if (event) event.currentTarget.classList.add('selected');
         if (mode === 'human') {
             gameMode = 'human';
             document.getElementById('start-menu').style.display = 'none';
@@ -3130,12 +3151,16 @@
         }
     }
 
-    function selectDifficulty(diff) {
+    function selectDifficulty(diff, event) {
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+        if (event) event.currentTarget.classList.add('selected');
         aiDifficulty = diff;
         document.getElementById('side-select').classList.add('show');
     }
 
-    function startAIGame(side) {
+    function startAIGame(side, event) {
+        document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('selected'));
+        if (event) event.currentTarget.classList.add('selected');
         playerSide = side;
         document.getElementById('start-menu').style.display = 'none';
         showGameUI();
