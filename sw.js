@@ -1,8 +1,8 @@
 const CACHE_NAME = 'baghchal-v1';
 const ASSETS_TO_CACHE = [
-    '/Claude/',
-    '/Claude/index.html',
-    '/Claude/manifest.json'
+    '/baagchal/',
+    '/baagchal/index.html',
+    '/baagchal/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
