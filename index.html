@@ -773,6 +773,7 @@
         #board-canvas {
             position: absolute;
             top: 0; left: 0;
+            width: 100%; height: 100%;
             cursor: pointer;
         }
 
@@ -1757,7 +1758,8 @@
     let animPiece = null; // { type, fromX, fromY, toX, toY, progress, captureKey }
 
     function initLayout() {
-        boardPixelSize = container.offsetWidth;
+        const rect = container.getBoundingClientRect();
+        boardPixelSize = Math.round(rect.width) || container.offsetWidth || 340;
         canvas.width = boardPixelSize;
         canvas.height = boardPixelSize;
         padding = Math.max(35, Math.round(boardPixelSize * 0.08));
@@ -3169,6 +3171,7 @@
             document.getElementById('game-container').classList.add('show');
             initLayout();
             initGame();
+            requestAnimationFrame(() => { initLayout(); drawBoard(); });
 
             // Send role confirmation
             peerConn.send({ type: 'start', role: onlineRole });
@@ -3290,6 +3293,7 @@
             document.getElementById('game-container').classList.add('show');
             initLayout();
             initGame();
+            requestAnimationFrame(() => { initLayout(); drawBoard(); });
         } else if (mode === 'online') {
             document.getElementById('online-lobby').style.display = 'flex';
             document.getElementById('difficulty-select').classList.remove('show');
@@ -3317,6 +3321,8 @@
         document.getElementById('game-container').classList.add('show');
         initLayout();
         initGame();
+        // Safety: redraw after layout stabilizes
+        requestAnimationFrame(() => { initLayout(); drawBoard(); });
     }
 
     function restartGame() {
@@ -3995,6 +4001,7 @@
         document.getElementById('game-container').classList.add('show');
         initLayout();
         initGame();
+        requestAnimationFrame(() => { initLayout(); drawBoard(); });
     }
 
     // ===== PULSING VALID MOVES ANIMATION =====
@@ -4053,6 +4060,14 @@
             setTimeout(() => openTutorial(), 800);
         }
     } catch(e) {}
+
+    // Safety redraw: ensure board renders after all resources load
+    window.addEventListener('load', () => {
+        if (document.getElementById('game-container').classList.contains('show')) {
+            initLayout();
+            drawBoard();
+        }
+    });
 
     // ===== PWA: Service Worker Registration =====
     if ('serviceWorker' in navigator) {
