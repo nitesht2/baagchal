@@ -1,4 +1,4 @@
-const CACHE_NAME = 'baghchal-v1';
+const CACHE_NAME = 'baghchal-v2';
 const ASSETS_TO_CACHE = [
     '/Claude/',
     '/Claude/index.html',
@@ -29,20 +29,16 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request).then((cached) => {
-            if (event.request.mode === 'navigate') {
-                return fetch(event.request)
-                    .then((response) => {
-                        const clone = response.clone();
-                        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-                        return response;
-                    })
-                    .catch(() => cached);
-            }
-            return cached || fetch(event.request).then((response) => {
-                const clone = response.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            // Stale-while-revalidate: serve cache immediately, update in background
+            const fetchPromise = fetch(event.request).then((response) => {
+                if (response && response.ok) {
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                }
                 return response;
-            });
+            }).catch(() => cached);
+
+            return cached || fetchPromise;
         })
     );
 });
