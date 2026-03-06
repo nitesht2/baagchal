@@ -10,8 +10,8 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Bagh Chal - The Tiger Moving Game of Nepal">
     <meta property="og:description" content="Play the ancient Nepali strategy board game. 4 Tigers vs 20 Goats. Challenge the AI or play with friends online.">
-    <meta property="og:url" content="https://nitesht2.github.io/baagchal/">
-    <meta property="og:image" content="https://nitesht2.github.io/baagchal/og-image.png">
+    <meta property="og:url" content="https://nitesht2.github.io/Claude/">
+    <meta property="og:image" content="https://nitesht2.github.io/Claude/og-image.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
 
@@ -19,7 +19,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Bagh Chal - The Tiger Moving Game of Nepal">
     <meta name="twitter:description" content="Play the ancient Nepali strategy board game. 4 Tigers vs 20 Goats. Challenge the AI or play with friends online.">
-    <meta name="twitter:image" content="https://nitesht2.github.io/baagchal/og-image.png">
+    <meta name="twitter:image" content="https://nitesht2.github.io/Claude/og-image.png">
 
     <title>Bagh Chal - बाघ चाल</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐅</text></svg>">
@@ -27,8 +27,9 @@
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@700&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Devanagari:wght@700&display=swap" rel="stylesheet"></noscript>
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js" defer></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -3519,7 +3520,8 @@
         bgCanvas.height = window.innerHeight;
         bgParticles = [];
         const colors = ['rgba(233,69,96,', 'rgba(76,175,80,', 'rgba(255,215,0,'];
-        for (let i = 0; i < 30; i++) {
+        const particleCount = window.innerWidth < 600 ? 12 : 30;
+        for (let i = 0; i < particleCount; i++) {
             bgParticles.push({
                 x: Math.random() * bgCanvas.width,
                 y: Math.random() * bgCanvas.height,
@@ -3533,6 +3535,7 @@
     }
 
     function animateBackground() {
+        if (document.hidden) { requestAnimationFrame(animateBackground); return; }
         bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
         for (const p of bgParticles) {
             p.x += p.vx;
