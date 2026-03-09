@@ -815,11 +815,11 @@
             100% { left: 100%; }
         }
         .turn-indicator.your-turn {
-            animation: turn-pulse 2s ease-in-out infinite;
+            animation: turn-pulse 1.8s ease-in-out infinite;
         }
         @keyframes turn-pulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0); }
-            50% { box-shadow: 0 0 16px 6px rgba(255,215,0,0.25); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(255,215,0,0), 0 0 0 0 rgba(255,215,0,0); transform: scale(1); }
+            50% { box-shadow: 0 0 20px 8px rgba(255,215,0,0.2), 0 0 40px 16px rgba(255,215,0,0.08); transform: scale(1.02); }
         }
         .turn-tiger {
             background: linear-gradient(135deg, rgba(255,99,71,0.15), rgba(255,99,71,0.08));
@@ -879,7 +879,8 @@
         #board-canvas {
             position: absolute;
             top: 0; left: 0;
-            cursor: pointer;
+            cursor: default;
+            touch-action: none;
         }
 
         .right-panel {
@@ -1373,6 +1374,7 @@
                 <button class="diff-btn" onclick="selectDifficulty('easy', event)">Easy</button>
                 <button class="diff-btn" onclick="selectDifficulty('medium', event)">Medium</button>
                 <button class="diff-btn" onclick="selectDifficulty('hard', event)">Hard</button>
+                <button class="diff-btn" onclick="selectDifficulty('expert', event)" style="background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05)); border-color: rgba(255,215,0,0.3);">Expert</button>
             </div>
         </div>
 
@@ -1464,16 +1466,46 @@
 
     <!-- Win Overlay -->
     <div class="message-overlay" id="message-overlay">
-        <div class="message-box">
-            <div id="win-piece-icon" style="font-size:4rem; margin-bottom:12px; animation: bounceIn 0.5s ease;"></div>
-            <h2 id="message-title">Game Over</h2>
-            <p id="message-text">Someone wins!</p>
-            <p id="elo-change" style="display:none; font-size:0.9rem; font-weight:bold; margin-bottom:12px;"></p>
+        <div class="message-box" style="max-width:460px; padding:36px 40px;">
+            <div id="win-piece-icon" style="font-size:4.5rem; margin-bottom:8px; animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);"></div>
+            <h2 id="message-title" style="font-size:2.2rem; margin-bottom:6px;">Game Over</h2>
+            <p id="message-text" style="margin-bottom:16px;">Someone wins!</p>
+            <p id="elo-change" style="display:none; font-size:1rem; font-weight:bold; margin-bottom:12px;"></p>
+            <!-- Game stats summary -->
+            <div id="win-stats" style="display:flex; justify-content:center; gap:20px; margin-bottom:16px; padding:12px 16px; background:rgba(255,255,255,0.04); border-radius:12px; border:1px solid rgba(255,255,255,0.08);">
+                <div style="text-align:center;">
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--gold);" id="win-stat-moves">0</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Moves</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--tiger-color);" id="win-stat-captures">0</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Captures</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--goat-color);" id="win-stat-trapped">0</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Trapped</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="font-size:1.4rem; font-weight:800; color:var(--text-primary);" id="win-stat-time">0:00</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em;">Time</div>
+                </div>
+            </div>
             <div class="strategy-tip" id="strategy-tip" style="display:none;"></div>
-            <button class="btn btn-restart" onclick="restartGame()">Play Again</button>
-            <button class="btn btn-menu" id="rematch-btn" onclick="requestRematch()" style="display:none; background:rgba(88,166,255,0.2); border-color:rgba(88,166,255,0.4); color:#58a6ff;">Rematch</button>
-            <button class="btn btn-menu" onclick="startReplay()" style="background:rgba(255,165,0,0.2); border-color:rgba(255,165,0,0.4); color:#ffb347;">Replay</button>
-            <button class="btn btn-menu" onclick="backToMenu()" style="background:rgba(255,255,255,0.1);">Menu</button>
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                <button class="btn btn-restart" onclick="restartGame()" style="flex:1; min-width:120px;">Play Again</button>
+                <button class="btn btn-menu" id="rematch-btn" onclick="requestRematch()" style="display:none; flex:1; min-width:120px; background:rgba(88,166,255,0.2); border-color:rgba(88,166,255,0.4); color:#58a6ff;">Rematch</button>
+            </div>
+            <div style="display:flex; gap:8px; justify-content:center; margin-top:8px;">
+                <button class="btn btn-menu" onclick="startReplay()" style="flex:1; background:rgba(255,165,0,0.15); border-color:rgba(255,165,0,0.3); color:#ffb347;">Replay</button>
+                <button class="btn btn-menu" onclick="backToMenu()" style="flex:1; background:rgba(255,255,255,0.06);">Menu</button>
+            </div>
+            <div style="margin-top:12px; font-size:0.7rem; color:var(--text-muted); letter-spacing:0.04em;">
+                Press <kbd style="padding:2px 6px; background:rgba(255,255,255,0.1); border-radius:4px; font-size:0.65rem;">R</kbd> to restart
+                &nbsp;·&nbsp;
+                <kbd style="padding:2px 6px; background:rgba(255,255,255,0.1); border-radius:4px; font-size:0.65rem;">U</kbd> to undo
+                &nbsp;·&nbsp;
+                <kbd style="padding:2px 6px; background:rgba(255,255,255,0.1); border-radius:4px; font-size:0.65rem;">M</kbd> to mute
+            </div>
         </div>
     </div>
 
@@ -1587,18 +1619,140 @@
         } catch (e) { /* audio not supported */ }
     }
 
-    function soundPlace() { playTone(600, 0.12, 'sine', 0.12); }
-    function soundMove() { playTone(440, 0.1, 'triangle', 0.1); }
-    function soundCapture() { playTone(220, 0.25, 'sawtooth', 0.1); setTimeout(() => playTone(180, 0.2, 'sawtooth', 0.08), 100); }
-    function effectCapture(key) { spawnCaptureParticles(key); triggerShake(); startEffectsLoop(); }
+    // Rich layered sound effects
+    function playRichSound(notes, options = {}) {
+        if (!soundEnabled) return;
+        try {
+            const ctx = getAudioCtx();
+            const now = ctx.currentTime;
+            notes.forEach(n => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                const filter = ctx.createBiquadFilter();
+                osc.type = n.type || 'sine';
+                osc.frequency.setValueAtTime(n.freq, now + (n.delay || 0));
+                if (n.freqEnd) osc.frequency.exponentialRampToValueAtTime(n.freqEnd, now + (n.delay || 0) + (n.dur || 0.2));
+                filter.type = n.filterType || 'lowpass';
+                filter.frequency.value = n.filterFreq || 4000;
+                filter.Q.value = n.filterQ || 1;
+                gain.gain.setValueAtTime(0, now + (n.delay || 0));
+                gain.gain.linearRampToValueAtTime(n.vol || 0.1, now + (n.delay || 0) + (n.attack || 0.01));
+                gain.gain.exponentialRampToValueAtTime(0.001, now + (n.delay || 0) + (n.dur || 0.2));
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now + (n.delay || 0));
+                osc.stop(now + (n.delay || 0) + (n.dur || 0.2) + 0.05);
+            });
+        } catch (e) {}
+    }
+
+    function playNoise(duration, volume, filterFreq) {
+        if (!soundEnabled) return;
+        try {
+            const ctx = getAudioCtx();
+            const bufferSize = ctx.sampleRate * duration;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.value = filterFreq || 1000;
+            filter.Q.value = 0.5;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(volume, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+            source.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            source.start();
+        } catch (e) {}
+    }
+
+    function soundPlace() {
+        playRichSound([
+            { freq: 800, dur: 0.08, vol: 0.1, type: 'sine', attack: 0.005 },
+            { freq: 1200, dur: 0.06, vol: 0.06, type: 'sine', delay: 0.02 },
+            { freq: 400, dur: 0.15, vol: 0.08, type: 'triangle', attack: 0.005 },
+        ]);
+        playNoise(0.05, 0.03, 3000);
+    }
+
+    function soundMove() {
+        playRichSound([
+            { freq: 500, freqEnd: 600, dur: 0.12, vol: 0.08, type: 'sine', attack: 0.01 },
+            { freq: 250, dur: 0.1, vol: 0.05, type: 'triangle', delay: 0.03 },
+        ]);
+    }
+
+    function soundCapture() {
+        playRichSound([
+            { freq: 150, freqEnd: 80, dur: 0.35, vol: 0.15, type: 'sawtooth', filterFreq: 800, attack: 0.005 },
+            { freq: 300, freqEnd: 100, dur: 0.25, vol: 0.1, type: 'square', filterFreq: 600, delay: 0.05 },
+            { freq: 600, dur: 0.08, vol: 0.12, type: 'sine', delay: 0.0 },
+            { freq: 80, dur: 0.4, vol: 0.08, type: 'sine', delay: 0.1 },
+        ]);
+        playNoise(0.15, 0.06, 1500);
+        setTimeout(() => playNoise(0.1, 0.03, 800), 100);
+    }
+
+    function effectCapture(key) { spawnCaptureParticles(key); spawnCaptureRing(key); triggerShake(); startEffectsLoop(); }
     function effectWin() { spawnConfetti(); startEffectsLoop(); }
-    function soundSelect() { playTone(800, 0.06, 'sine', 0.08); }
-    function soundWin() { [0, 150, 300, 450].forEach((d, i) => setTimeout(() => playTone(400 + i * 100, 0.3, 'sine', 0.12), d)); }
-    function soundUndo() { playTone(300, 0.1, 'triangle', 0.08); }
+
+    function soundSelect() {
+        playRichSound([
+            { freq: 900, dur: 0.05, vol: 0.07, type: 'sine', attack: 0.003 },
+            { freq: 1350, dur: 0.04, vol: 0.04, type: 'sine', delay: 0.015 },
+        ]);
+    }
+
+    function soundWin() {
+        const notes = [523, 659, 784, 1047];
+        notes.forEach((freq, i) => {
+            playRichSound([
+                { freq, dur: 0.4, vol: 0.12, type: 'sine', delay: i * 0.15, attack: 0.02 },
+                { freq: freq * 1.5, dur: 0.3, vol: 0.05, type: 'sine', delay: i * 0.15 + 0.05 },
+                { freq: freq * 0.5, dur: 0.5, vol: 0.06, type: 'triangle', delay: i * 0.15 },
+            ]);
+        });
+    }
+
+    function soundUndo() {
+        playRichSound([
+            { freq: 500, freqEnd: 300, dur: 0.12, vol: 0.08, type: 'triangle', attack: 0.01 },
+            { freq: 200, dur: 0.08, vol: 0.04, type: 'sine', delay: 0.05 },
+        ]);
+    }
+
+    function soundDragStart() {
+        playRichSound([
+            { freq: 600, dur: 0.04, vol: 0.05, type: 'sine', attack: 0.003 },
+        ]);
+    }
+
+    function soundDrop() {
+        playRichSound([
+            { freq: 400, dur: 0.06, vol: 0.06, type: 'triangle', attack: 0.005 },
+            { freq: 200, dur: 0.1, vol: 0.04, type: 'sine', delay: 0.02 },
+        ]);
+        playNoise(0.04, 0.02, 2000);
+    }
+
+    function soundInvalidDrop() {
+        playRichSound([
+            { freq: 200, freqEnd: 150, dur: 0.15, vol: 0.06, type: 'square', filterFreq: 500 },
+        ]);
+    }
+
     function soundYourTurn() {
-        playTone(523, 0.15, 'sine', 0.12);
-        setTimeout(() => playTone(659, 0.15, 'sine', 0.12), 150);
-        setTimeout(() => playTone(784, 0.2, 'sine', 0.12), 300);
+        playRichSound([
+            { freq: 523, dur: 0.15, vol: 0.1, type: 'sine', attack: 0.02 },
+            { freq: 659, dur: 0.15, vol: 0.1, type: 'sine', delay: 0.15 },
+            { freq: 784, dur: 0.2, vol: 0.1, type: 'sine', delay: 0.3 },
+            { freq: 523 * 0.5, dur: 0.4, vol: 0.05, type: 'triangle', delay: 0 },
+        ]);
     }
 
     function notifyYourTurn() {
@@ -1891,7 +2045,7 @@
     }
 
     // ELO calculation
-    const AI_ELO = { easy: 600, medium: 1100, hard: 1500 };
+    const AI_ELO = { easy: 600, medium: 1100, hard: 1500, expert: 1900 };
 
     function calcEloChange(playerElo, opponentElo, won) {
         const K = stats.played < 10 ? 40 : 20; // higher K for new players
@@ -1951,6 +2105,28 @@
     // Animation state
     let animating = false;
     let animPiece = null; // { type, fromX, fromY, toX, toY, progress, captureKey }
+
+    // Drag-and-drop state
+    let isDragging = false;
+    let dragPiece = null; // { type, fromKey, x, y }
+    let dragStartPos = null;
+    let dragThreshold = 8;
+    let dragMoved = false;
+
+    // Hover state
+    let hoverGridPos = null;
+    let hoverMoves = []; // potential moves for hovered piece
+    let lastHoverKey = null;
+
+    // Capture ring effect
+    let captureRings = [];
+
+    // Game timer
+    let gameStartTime = 0;
+    let gameMoveCount = 0;
+
+    // Landing animation
+    let landingAnims = []; // { x, y, startTime, duration }
 
     function initLayout() {
         const rect = container.getBoundingClientRect();
@@ -2017,19 +2193,55 @@
     function spawnCaptureParticles(key) {
         const { r, c } = parseKey(key);
         const { x, y } = gridToPixel(r, c);
-        for (let i = 0; i < 12; i++) {
-            const angle = (Math.PI * 2 / 12) * i + Math.random() * 0.5;
-            const speed = 2 + Math.random() * 3;
+        // Inner burst - fast, small, bright
+        for (let i = 0; i < 16; i++) {
+            const angle = (Math.PI * 2 / 16) * i + Math.random() * 0.3;
+            const speed = 3 + Math.random() * 5;
             particles.push({
                 x, y,
                 vx: Math.cos(angle) * speed,
                 vy: Math.sin(angle) * speed,
                 life: 1,
-                decay: 0.02 + Math.random() * 0.02,
-                size: 3 + Math.random() * 4,
-                color: `hsl(${10 + Math.random() * 30}, 90%, ${50 + Math.random() * 30}%)`
+                decay: 0.025 + Math.random() * 0.02,
+                size: 3 + Math.random() * 5,
+                color: `hsl(${10 + Math.random() * 40}, 95%, ${55 + Math.random() * 35}%)`
             });
         }
+        // Outer burst - slower, larger, dimmer
+        for (let i = 0; i < 8; i++) {
+            const angle = (Math.PI * 2 / 8) * i + Math.random() * 0.5;
+            const speed = 1 + Math.random() * 2;
+            particles.push({
+                x, y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 0.8,
+                decay: 0.012 + Math.random() * 0.01,
+                size: 6 + Math.random() * 8,
+                color: `hsl(${30 + Math.random() * 20}, 80%, ${40 + Math.random() * 20}%)`
+            });
+        }
+        // Sparks - tiny, fast
+        for (let i = 0; i < 10; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 5 + Math.random() * 6;
+            particles.push({
+                x, y,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 0.6,
+                decay: 0.04 + Math.random() * 0.03,
+                size: 1.5 + Math.random() * 2,
+                color: '#fff'
+            });
+        }
+    }
+
+    function spawnCaptureRing(key) {
+        const { r, c } = parseKey(key);
+        const { x, y } = gridToPixel(r, c);
+        captureRings.push({ x, y, radius: 5, maxRadius: cellSize * 0.8, life: 1, decay: 0.025 });
+        captureRings.push({ x, y, radius: 5, maxRadius: cellSize * 0.5, life: 0.8, decay: 0.03 });
     }
 
     function spawnConfetti() {
@@ -2059,6 +2271,7 @@
             p.x += p.vx;
             p.y += p.vy;
             p.vy += 0.1; // gravity
+            p.vx *= 0.98; // air resistance
             p.life -= p.decay;
             return p.life > 0;
         });
@@ -2073,12 +2286,39 @@
             return p.life > 0 && p.y < canvas.height + 20;
         });
 
+        // Update capture rings
+        captureRings = captureRings.filter(ring => {
+            ring.radius += (ring.maxRadius - ring.radius) * 0.15;
+            ring.life -= ring.decay;
+            return ring.life > 0;
+        });
+
+        // Update landing animations
+        const now = performance.now();
+        landingAnims = landingAnims.filter(a => now - a.startTime < a.duration);
+
         // Decay shake
         if (shakeAmount > 0) shakeAmount *= 0.85;
         if (shakeAmount < 0.5) shakeAmount = 0;
     }
 
     function drawParticles() {
+        // Draw capture rings (behind particles)
+        for (const ring of captureRings) {
+            ctx.globalAlpha = ring.life * 0.6;
+            ctx.strokeStyle = `rgba(255, 120, 50, ${ring.life})`;
+            ctx.lineWidth = 3 * ring.life;
+            ctx.beginPath();
+            ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+            ctx.stroke();
+            // Inner glow
+            ctx.globalAlpha = ring.life * 0.15;
+            ctx.fillStyle = `rgba(255, 100, 50, 1)`;
+            ctx.beginPath();
+            ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
         // Draw capture particles
         for (const p of particles) {
             ctx.globalAlpha = p.life;
@@ -2086,6 +2326,13 @@
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
             ctx.fill();
+            // Glow effect for bright particles
+            if (p.size > 4) {
+                ctx.globalAlpha = p.life * 0.3;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size * p.life * 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
 
         // Draw confetti
@@ -2106,7 +2353,7 @@
         if (effectsRunning) return;
         effectsRunning = true;
         function effectFrame() {
-            if (particles.length === 0 && confettiParticles.length === 0 && shakeAmount === 0) {
+            if (particles.length === 0 && confettiParticles.length === 0 && captureRings.length === 0 && shakeAmount === 0 && landingAnims.length === 0) {
                 effectsRunning = false;
                 return;
             }
@@ -2208,6 +2455,45 @@
             }
         }
 
+        // Hover highlights for valid destinations
+        if (hoverMoves.length > 0 && !isDragging && !animating) {
+            for (const move of hoverMoves) {
+                const { r: hr, c: hc } = parseKey(move.to);
+                const { x: hx, y: hy } = gridToPixel(hr, hc);
+                const hRadius = Math.max(8, cellSize * 0.08);
+                ctx.beginPath();
+                ctx.arc(hx, hy, hRadius + 2, 0, Math.PI * 2);
+                ctx.fillStyle = move.capture ? 'rgba(233,69,96,0.12)' : 'rgba(255,255,255,0.08)';
+                ctx.fill();
+                ctx.strokeStyle = move.capture ? 'rgba(233,69,96,0.25)' : 'rgba(255,255,255,0.15)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+        }
+
+        // Drag-and-drop destination highlights
+        if (isDragging && dragPiece) {
+            const dragType = dragPiece.type;
+            const dragMovesList = dragType === 'tiger' ? getValidMovesForTiger(dragPiece.fromKey) : getValidMovesForGoat(dragPiece.fromKey);
+            for (const move of dragMovesList) {
+                const { r: dr, c: dc } = parseKey(move.to);
+                const { x: dx, y: dy } = gridToPixel(dr, dc);
+                const dRadius = Math.max(12, cellSize * 0.12);
+                const isCapture = !!move.capture;
+                const pulseT2 = Date.now() / 1000;
+                const pulse2 = 0.5 + Math.sin(pulseT2 * 4) * 0.3;
+                ctx.beginPath();
+                ctx.arc(dx, dy, dRadius, 0, Math.PI * 2);
+                ctx.fillStyle = isCapture ? `rgba(233,69,96,${0.2 + pulse2 * 0.15})` : `rgba(255,215,0,${0.15 + pulse2 * 0.1})`;
+                ctx.fill();
+                ctx.strokeStyle = isCapture ? `rgba(233,69,96,${0.5 + pulse2 * 0.3})` : `rgba(255,215,0,${0.3 + pulse2 * 0.3})`;
+                ctx.lineWidth = 2.5;
+                ctx.setLineDash([4, 4]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
         // Corner markers (tiger starting positions)
         const corners = [[0,0],[0,4],[4,0],[4,4]];
         const markSize = Math.max(5, cellSize * 0.06);
@@ -2279,11 +2565,12 @@
             }
         }
 
-        // Draw pieces (skip animating piece at its old position)
+        // Draw pieces (skip animating piece at its old position, skip dragged piece)
         for (let r = 0; r < BOARD_SIZE; r++) {
             for (let c = 0; c < BOARD_SIZE; c++) {
                 const key = posKey(r, c);
                 if (animPiece && key === animPiece.fromKey) continue;
+                if (isDragging && dragPiece && key === dragPiece.fromKey) continue;
                 if (animPiece && animPiece.captureKey && key === animPiece.captureKey) {
                     // Draw captured piece fading out
                     const captAlpha = 1 - animPiece.progress;
@@ -2301,12 +2588,62 @@
             }
         }
 
-        // Draw animating piece
+        // Draw animating piece with arc
         if (animating && animPiece) {
-            const t = animPiece.progress;
+            const t = Math.min(animPiece.progress, 1);
             const cx = animPiece.fromX + (animPiece.toX - animPiece.fromX) * t;
-            const cy = animPiece.fromY + (animPiece.toY - animPiece.fromY) * t;
-            drawPiece(cx, cy, animPiece.type, false);
+            const cy = animPiece.fromY + (animPiece.toY - animPiece.fromY) * t + (animPiece.arcOffset || 0);
+            // Scale up slightly during jump
+            const jumpScale = 1 + Math.sin(t * Math.PI) * 0.08;
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(jumpScale, jumpScale);
+            drawPiece(0, 0, animPiece.type, false);
+            ctx.restore();
+            // Motion trail shadow
+            if (t > 0.1 && t < 0.9) {
+                const trailT = Math.max(0, t - 0.1);
+                const trailX = animPiece.fromX + (animPiece.toX - animPiece.fromX) * trailT;
+                const trailY = animPiece.fromY + (animPiece.toY - animPiece.fromY) * trailT;
+                ctx.globalAlpha = 0.1;
+                drawPiece(trailX, trailY, animPiece.type, false);
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Draw landing animations
+        const nowLand = performance.now();
+        for (const a of landingAnims) {
+            const t = (nowLand - a.startTime) / a.duration;
+            if (t >= 0 && t < 1) {
+                const ringSize = cellSize * 0.4 * t;
+                const alpha = (1 - t) * 0.4;
+                ctx.globalAlpha = alpha;
+                ctx.strokeStyle = a.color || 'rgba(255,215,0,0.8)';
+                ctx.lineWidth = 2 * (1 - t);
+                ctx.beginPath();
+                ctx.arc(a.x, a.y, ringSize, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Draw dragged piece (on top of everything)
+        if (isDragging && dragPiece) {
+            ctx.globalAlpha = 0.85;
+            const dragScale = 1.15;
+            ctx.save();
+            ctx.translate(dragPiece.x, dragPiece.y);
+            ctx.scale(dragScale, dragScale);
+            drawPiece(0, 0, dragPiece.type, true);
+            ctx.restore();
+            ctx.globalAlpha = 1;
+            // Ghost piece at original position
+            const fromPos = parseKey(dragPiece.fromKey);
+            const { x: ghostX, y: ghostY } = gridToPixel(fromPos.r, fromPos.c);
+            ctx.globalAlpha = 0.25;
+            drawPiece(ghostX, ghostY, dragPiece.type, false);
+            ctx.globalAlpha = 1;
         }
 
         // Restore shake context
@@ -2431,7 +2768,7 @@
             fromX: fromPx.x, fromY: fromPx.y,
             toX: toPx.x, toY: toPx.y,
             progress: 0,
-            skipKey: toKey // piece is already placed at toKey in board state, so skip drawing it statically
+            skipKey: toKey
         };
 
         // Temporarily put piece back at from for drawing and remove from to
@@ -2441,23 +2778,44 @@
 
         animPiece.skipKey = fromKey;
 
-        const duration = 280;
+        const duration = captureKey ? 350 : 300;
         const startTime = performance.now();
-        function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+        // Bounce easing for satisfying landing
+        function easeOutBounce(t) {
+            if (t < 0.7) {
+                return (t / 0.7) * (t / 0.7) * (3 - 2 * t / 0.7) * 1.0;
+            } else if (t < 0.85) {
+                const bt = (t - 0.7) / 0.15;
+                return 1.0 + Math.sin(bt * Math.PI) * 0.04;
+            } else {
+                const bt = (t - 0.85) / 0.15;
+                return 1.0 + Math.sin(bt * Math.PI) * 0.015;
+            }
+        }
+
+        // Arc height for jump animation
+        const dist = Math.sqrt((toPx.x - fromPx.x) ** 2 + (toPx.y - fromPx.y) ** 2);
+        const arcHeight = captureKey ? dist * 0.2 : dist * 0.08;
 
         function frame(now) {
             const elapsed = now - startTime;
             const raw = Math.min(elapsed / duration, 1);
-            animPiece.progress = easeOutCubic(raw);
+            const eased = easeOutBounce(raw);
+            animPiece.progress = Math.min(eased, 1);
 
-            // Halfway through animation, remove captured piece
-            if (captureKey && animPiece.progress > 0.5) {
+            // Add vertical arc
+            const arcOffset = -arcHeight * Math.sin(Math.min(raw, 1) * Math.PI);
+            animPiece.arcOffset = arcOffset;
+
+            // Halfway through animation, remove captured piece with flash
+            if (captureKey && raw > 0.4 && board[captureKey] === 'goat') {
                 board[captureKey] = null;
             }
 
             drawBoard();
 
-            if (animPiece.progress < 1) {
+            if (raw < 1) {
                 requestAnimationFrame(frame);
             } else {
                 // Finalize
@@ -2466,6 +2824,12 @@
                 if (captureKey) board[captureKey] = null;
                 animating = false;
                 animPiece = null;
+
+                // Spawn landing effect
+                const landColor = pieceType === 'tiger' ? 'rgba(255,99,71,0.6)' : 'rgba(102,187,106,0.6)';
+                landingAnims.push({ x: toPx.x, y: toPx.y, startTime: performance.now(), duration: 400, color: landColor });
+                startEffectsLoop();
+
                 drawBoard();
                 callback();
             }
@@ -2501,6 +2865,8 @@
         if (replayInterval) { clearInterval(replayInterval); replayInterval = null; }
         document.getElementById('replay-bar').classList.remove('show');
 
+        gameStartTime = Date.now();
+        gameMoveCount = 0;
         updateUI();
         drawBoard();
         recordSnapshot(); // record initial board state
@@ -2841,6 +3207,15 @@
             tipEl.style.display = 'block';
         }
 
+        // Populate game stats
+        document.getElementById('win-stat-moves').textContent = moveCount;
+        document.getElementById('win-stat-captures').textContent = goatsCaptured;
+        document.getElementById('win-stat-trapped').textContent = countTrappedTigers();
+        const elapsed = gameStartTime > 0 ? Math.floor((Date.now() - gameStartTime) / 1000) : 0;
+        const mins = Math.floor(elapsed / 60);
+        const secs = elapsed % 60;
+        document.getElementById('win-stat-time').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+
         overlay.classList.add('show');
         effectWin(); // confetti!
     }
@@ -2878,7 +3253,7 @@
     }
 
     // ===== AI ENGINE (Minimax + Alpha-Beta + Opening Book + Enhanced Eval) =====
-    const DEPTH_MAP = { easy: 2, medium: 5, hard: 8 };
+    const DEPTH_MAP = { easy: 2, medium: 5, hard: 8, expert: 12 };
 
     function cloneBoard(b) { return { ...b }; }
 
@@ -3193,7 +3568,7 @@
         }
 
         const maxDepth = DEPTH_MAP[aiDifficulty] || 4;
-        const timeLimit = aiDifficulty === 'hard' ? 2000 : (aiDifficulty === 'medium' ? 1000 : 500);
+        const timeLimit = aiDifficulty === 'expert' ? 4000 : (aiDifficulty === 'hard' ? 2000 : (aiDifficulty === 'medium' ? 1000 : 500));
         const startTime = performance.now();
 
         let moves = isAITiger
@@ -3740,26 +4115,213 @@
         };
     }
 
-    // Mouse click
-    canvas.addEventListener('click', (e) => {
+    // Find piece at pixel position
+    function findPieceAtPixel(px, py) {
+        for (let r = 0; r < BOARD_SIZE; r++) {
+            for (let c = 0; c < BOARD_SIZE; c++) {
+                const key = posKey(r, c);
+                const piece = board[key];
+                if (!piece) continue;
+                const { x, y } = gridToPixel(r, c);
+                const baseR = Math.max(24, Math.round(cellSize * 0.38));
+                const dist = Math.sqrt((px - x) ** 2 + (py - y) ** 2);
+                if (dist < baseR * 1.2) return { key, type: piece };
+            }
+        }
+        return null;
+    }
+
+    // ===== DRAG-AND-DROP + CLICK HANDLING =====
+    function handlePointerDown(px, py) {
+        if (gameOver || aiThinking || animating || replayActive) return;
+        if (gameMode === 'ai' && currentTurn !== playerSide) return;
+        if (gameMode === 'online' && currentTurn !== playerSide) return;
+
+        dragStartPos = { x: px, y: py };
+        dragMoved = false;
+
+        const phase = getPhase();
+
+        // In phase 1 for goats, don't start drag (just place)
+        if (currentTurn === 'goat' && phase === 1) return;
+
+        // Find piece at click position
+        const found = findPieceAtPixel(px, py);
+        if (found && found.type === currentTurn) {
+            // Prepare for potential drag
+            dragPiece = { type: found.type, fromKey: found.key, x: px, y: py };
+        }
+    }
+
+    function handlePointerMove(px, py) {
+        // Update hover state (mouse only, not during drag)
+        if (!isDragging && !dragPiece) {
+            const gridPos = pixelToGrid(px, py);
+            const newKey = gridPos ? posKey(gridPos.r, gridPos.c) : null;
+            if (newKey !== lastHoverKey) {
+                lastHoverKey = newKey;
+                if (newKey && board[newKey] === currentTurn && !gameOver && !aiThinking && !animating && !replayActive) {
+                    const isPlayerPiece = (gameMode === 'human') || (currentTurn === playerSide);
+                    if (isPlayerPiece) {
+                        // Show hover moves only in phase 2 for goats or for tigers
+                        if (currentTurn === 'tiger' || getPhase() === 2) {
+                            hoverMoves = currentTurn === 'tiger' ? getValidMovesForTiger(newKey) : getValidMovesForGoat(newKey);
+                            canvas.style.cursor = 'grab';
+                        } else {
+                            hoverMoves = [];
+                            canvas.style.cursor = 'pointer';
+                        }
+                    } else {
+                        hoverMoves = [];
+                    }
+                } else if (newKey && !board[newKey] && currentTurn === 'goat' && getPhase() === 1) {
+                    canvas.style.cursor = 'pointer';
+                    hoverMoves = [];
+                } else {
+                    hoverMoves = [];
+                    canvas.style.cursor = selectedPiece ? 'pointer' : 'default';
+                }
+                if (!isDragging) drawBoard();
+            }
+        }
+
+        // Handle drag
+        if (dragPiece && dragStartPos) {
+            const dx = px - dragStartPos.x;
+            const dy = py - dragStartPos.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (!isDragging && dist > dragThreshold) {
+                isDragging = true;
+                dragMoved = true;
+                canvas.style.cursor = 'grabbing';
+                soundDragStart();
+                // Select the piece
+                selectedPiece = dragPiece.fromKey;
+                validMoves = dragPiece.type === 'tiger' ? getValidMovesForTiger(dragPiece.fromKey) : getValidMovesForGoat(dragPiece.fromKey);
+            }
+
+            if (isDragging) {
+                dragPiece.x = px;
+                dragPiece.y = py;
+                drawBoard();
+            }
+        }
+    }
+
+    function handlePointerUp(px, py) {
+        if (isDragging && dragPiece) {
+            // Find drop target
+            const dropGrid = pixelToGrid(px, py);
+            if (dropGrid) {
+                const dropKey = posKey(dropGrid.r, dropGrid.c);
+                const move = validMoves.find(m => m.to === dropKey);
+                if (move) {
+                    // Valid drop - execute the move
+                    soundDrop();
+                    if (currentTurn === 'goat') {
+                        executeGoatMove(dragPiece.fromKey, move);
+                    } else {
+                        executeTigerMove(dragPiece.fromKey, move);
+                    }
+                } else {
+                    soundInvalidDrop();
+                }
+            } else {
+                soundInvalidDrop();
+            }
+            isDragging = false;
+            dragPiece = null;
+            dragStartPos = null;
+            selectedPiece = null;
+            validMoves = [];
+            hoverMoves = [];
+            canvas.style.cursor = 'default';
+            drawBoard();
+            return;
+        }
+
+        // Regular click (no drag happened)
+        isDragging = false;
+        dragPiece = null;
+        dragStartPos = null;
+
+        if (!dragMoved) {
+            handleClick(px, py);
+        }
+        dragMoved = false;
+    }
+
+    // Extract move execution from click handlers for reuse with drag-drop
+    function executeGoatMove(fromKey, move) {
+        const fromLabel = posLabel(fromKey);
+        const toLabel = posLabel(move.to);
+        saveState(`Goat ${fromLabel} → ${toLabel}`);
+        selectedPiece = null;
+        validMoves = [];
+        board[move.to] = 'goat';
+        board[fromKey] = null;
+        if (gameMode === 'online') sendMoveToRemote({ from: fromKey, to: move.to, pieceType: 'goat', capture: null });
+        animateMove(fromKey, move.to, 'goat', null, () => {
+            soundMove();
+            switchTurn();
+        });
+    }
+
+    function executeTigerMove(fromKey, move) {
+        const fromLabel = posLabel(fromKey);
+        const toLabel = posLabel(move.to);
+        const desc = move.capture
+            ? `Tiger ${fromLabel} → ${toLabel} (captured goat at ${posLabel(move.capture)})`
+            : `Tiger ${fromLabel} → ${toLabel}`;
+        saveState(desc);
+        selectedPiece = null;
+        validMoves = [];
+        board[move.to] = 'tiger';
+        board[fromKey] = null;
+        if (move.capture) { board[move.capture] = null; goatsCaptured++; }
+        if (gameMode === 'online') sendMoveToRemote({ from: fromKey, to: move.to, pieceType: 'tiger', capture: move.capture });
+        animateMove(fromKey, move.to, 'tiger', move.capture, () => {
+            if (move.capture) { soundCapture(); effectCapture(move.capture); } else soundMove();
+            switchTurn();
+        });
+    }
+
+    // Pointer events (unified mouse + touch)
+    canvas.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        canvas.setPointerCapture(e.pointerId);
         const coords = getCanvasCoords(e);
-        handleClick(coords.x, coords.y);
+        handlePointerDown(coords.x, coords.y);
     });
 
-    // Touch support with larger hit targets
-    let touchHandled = false;
-    canvas.addEventListener('touchstart', (e) => {
-        e.preventDefault(); // prevent scroll while interacting with board
-        touchHandled = false;
-    }, { passive: false });
-
-    canvas.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        if (touchHandled) return;
-        touchHandled = true;
+    canvas.addEventListener('pointermove', (e) => {
         const coords = getCanvasCoords(e);
-        handleClick(coords.x, coords.y);
-    }, { passive: false });
+        handlePointerMove(coords.x, coords.y);
+    });
+
+    canvas.addEventListener('pointerup', (e) => {
+        const coords = getCanvasCoords(e);
+        handlePointerUp(coords.x, coords.y);
+    });
+
+    canvas.addEventListener('pointerleave', () => {
+        if (isDragging) {
+            isDragging = false;
+            dragPiece = null;
+            dragStartPos = null;
+            selectedPiece = null;
+            validMoves = [];
+            canvas.style.cursor = 'default';
+            drawBoard();
+        }
+        hoverMoves = [];
+        lastHoverKey = null;
+        drawBoard();
+    });
+
+    // Prevent context menu on long press
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
 
     // Prevent scrolling when touching the board area
     container.addEventListener('touchmove', (e) => {
@@ -3775,6 +4337,36 @@
                 drawBoard();
             }
         }, 100);
+    });
+
+    // ===== KEYBOARD SHORTCUTS =====
+    document.addEventListener('keydown', (e) => {
+        const key = e.key.toLowerCase();
+        // Don't handle shortcuts when typing in inputs
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        if (key === 'u' || (e.ctrlKey && key === 'z')) {
+            e.preventDefault();
+            undoMove();
+        } else if (key === 'r' && !e.ctrlKey && !e.metaKey) {
+            if (document.getElementById('game-container').classList.contains('show')) {
+                restartGame();
+            }
+        } else if (key === 'm') {
+            toggleSound();
+        } else if (key === 'escape') {
+            if (document.getElementById('message-overlay').classList.contains('show')) {
+                document.getElementById('message-overlay').classList.remove('show');
+            } else if (document.getElementById('tutorial-overlay').classList.contains('show')) {
+                closeTutorial();
+            } else if (replayActive) {
+                exitReplay();
+            }
+        } else if (key === 'h') {
+            if (document.getElementById('game-container').classList.contains('show')) {
+                toggleRules();
+            }
+        }
     });
 
     // ===== BACKGROUND PARTICLES =====
